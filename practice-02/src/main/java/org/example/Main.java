@@ -6,7 +6,7 @@ public class Main {
 
     private static final String DEVELOPER_NAME = "Лотов Марк Эдуардович";
     private static final String DEVELOPER_GROUP = "РИ-250911";
-    private static final String PROGRAM_VERSION = "v0.5";
+    private static final String PROGRAM_VERSION = "v0.6";
 
     private static final Scanner SCANNER = new Scanner(System.in);
 
@@ -89,23 +89,19 @@ public class Main {
             System.out.println("Ввод отменён. Возврат в меню.");
             return;
         }
-        double y = calculate_series_sum(n);
-        System.out.println("Результат: y = " + y);
+        double y = calculateSeriesSum(n);
+        printSeriesSumResult(n, y);
     }
 
     public static void runTask2Dialog() {
         System.out.println("\nЗадача 2. Степени числа A от 1 до N");
-        Double a = readDouble("Введти вещественное A или 'q' для отмены: ");
-        if (a == null) {
+        double[] params = readPowersParams();
+        if (params == null) {
             System.out.println("Ввод отменён. Возврат в меню.");
             return;
         }
-        Integer n = readInt("Введите целое N > 0 или 'q' для отмены: ", 1);
-        if (n == null) {
-            System.out.println("Ввод отменён. Возврат в меню.");
-            return;
-        }
-        print_integer_powers(a, n);
+        double[] powers = calculateIntegerPowers(params);
+        printIntegerPowers(powers);
     }
 
     public static void runTask3Dialog() {
@@ -115,21 +111,42 @@ public class Main {
             System.out.println("Ввод отменён. Возврат в меню.");
             return;
         }
-        System.out.println("результат: " + has_odd_digits(n));
+        printHasOddDigitsResult(n, hasOddDigits(n));
     }
 
     public static void runTask4Dialog() {
         System.out.println("\nЗадача 4. Расстояние между точками (x1, y1) и (x2, y2)");
+        double[] p = readPointsParams();
+        if (p == null) {
+            System.out.println("Ввод отменён. Возврат в меню.");
+            return;
+        }
+        double d = pointsDistance(p);
+        printPointsResult(p, d);
+    }
+
+    public static double[] readPowersParams() {
+        Double a = readDouble("Введти вещественное A или 'q' для отмены: ");
+        if (a == null) {
+            return null;
+        }
+        Integer n = readInt("Введите целое N > 0 или 'q' для отмены: ", 1);
+        if (n == null) {
+            return null;
+        }
+        return new double[]{a, n};
+    }
+
+    public static double[] readPointsParams() {
         Double x1 = readDouble("Введите x1 (или 'q' для отмены): ");
-        if (x1 == null) return;
+        if (x1 == null) return null;
         Double y1 = readDouble("Введите y1 (или 'q' для отмены): ");
-        if (y1 == null) return;
+        if (y1 == null) return null;
         Double x2 = readDouble("Введите x2 (или 'q' для отмены): ");
-        if (x2 == null) return;
+        if (x2 == null) return null;
         Double y2 = readDouble("Введите y2 (или 'q' для отмены): ");
-        if (y2 == null) return;
-        double d = points_distance(x1, y1, x2, y2);
-        System.out.println("Результат: растояние = " + d);
+        if (y2 == null) return null;
+        return new double[]{x1, y1, x2, y2};
     }
 
     public static Integer readMenuChoice(int min, int max) {
@@ -197,45 +214,93 @@ public class Main {
         return line.equalsIgnoreCase("q");
     }
 
-    public static double calculate_series_sum(int N) {
-        if (N < 1)
+    public static void validateSeriesSumArgs(int n) {
+        if (n < 1)
             throw new IllegalArgumentException("N должно быть > 0");
+    }
+
+    public static double calculateSeriesSum(int n) {
+        validateSeriesSumArgs(n);
 
         double sum = 0.0;
-        for (int i = 1; i <= N; i++) {
+        for (int i = 1; i <= n; i++) {
             sum += 1.0 / i;
         }
         return sum;
     }
 
-    public static void print_integer_powers(double A, int N) {
-        if (N < 1)
-            throw new IllegalArgumentException("N должно быть > 0");
+    public static void printSeriesSumResult(int n, double y) {
+        System.out.println("Результат: y = " + y);
+    }
 
+    public static void validatePowersParams(double[] params) {
+        if (params == null || params.length != 2)
+            throw new IllegalArgumentException("нужно 2 числа: A и N");
+        if (!Double.isFinite(params[0]))
+            throw new IllegalArgumentException("A должно быть конечным числом");
+        if (params[1] < 1)
+            throw new IllegalArgumentException("N должно быть > 0");
+    }
+
+    public static double[] calculateIntegerPowers(double[] params) {
+        validatePowersParams(params);
+        double a = params[0];
+        int n = (int) params[1];
+
+        var powers = new double[n];
         double power = 1.0;
-        for (int i = 1; i <= N; i++) {
-            power *= A;
+        for (var i = 0; i < n; i++) {
+            power *= a;
+            powers[i] = power;
+        }
+        return powers;
+    }
+
+    public static void printIntegerPowers(double[] powers) {
+        for (var power : powers) {
             System.out.println(power);
         }
     }
 
-    public static boolean has_odd_digits(int N) {
-        if (N < 1)
+    public static void validateHasOddDigitsArgs(int n) {
+        if (n < 1)
             throw new IllegalArgumentException("N должно быть > 0");
+    }
 
-        while (N > 0) {
-            int digit = N % 10;
+    public static boolean hasOddDigits(int n) {
+        validateHasOddDigitsArgs(n);
+
+        while (n > 0) {
+            int digit = n % 10;
             if (digit % 2 == 1) {
                 return true;
             }
-            N /= 10;
+            n /= 10;
         }
         return false;
     }
 
-    public static double points_distance(double x1, double y1, double x2, double y2) {
+    public static void printHasOddDigitsResult(int n, boolean result) {
+        System.out.println("результат: " + result);
+    }
+
+    public static void validatePointsParams(double[] p) {
+        if (p == null || p.length != 4)
+            throw new IllegalArgumentException("нужно 4 числа: x1, y1, x2, y2");
+        for (var v : p) {
+            if (!Double.isFinite(v))
+                throw new IllegalArgumentException("координаты должны быть конечными числами");
+        }
+    }
+
+    public static double pointsDistance(double[] p) {
+        validatePointsParams(p);
         return Math.sqrt(
-                Math.pow((x2 - x1), 2) + Math.pow((y2 - y1), 2)
+                Math.pow((p[2] - p[0]), 2) + Math.pow((p[3] - p[1]), 2)
         );
+    }
+
+    public static void printPointsResult(double[] p, double d) {
+        System.out.println("Результат: растояние = " + d);
     }
 }
